@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <style>
+            /* Background Styling */
+ body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #f9d5e5, #dbe6f6);
+    }
+    /* Calendar Wrapper */
+    .calendar-wrapper {
+    width: 55%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+    }
+    /* Header */
+    .calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    background: #f8eaff;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #8b6ba4;
+    }
+    /* Navigation Buttons */
+    .calendar-nav button {
+    border: none;
+    background: #e8d5f7;
+    color: #8b6ba4;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 8px;
+    transition: 0.3s;
+    }
+    .calendar-nav button:hover {
+    background: #d8bff0;
+    transform: scale(1.1);
+    }
+    /* Grid for Days */
+    .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 10px;
+    }
+    /* Weekdays */
+    .weekday {
+    font-size: 14px;
+    font-weight: bold;
+    color: #8b6ba4;
+    padding: 8px;
+    background: #f8eaff;
+    border-radius: 6px;
+    }
+    /* Calendar Days */
+    .calendar-day {
+        position: relative;
+        min-height: 70px;
+        padding: 8px;
+        background: #fff;
+        border-radius: 8px;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    .calendar-day:hover, .selected {
+        background: #f3e3ff;
+        transform: scale(1.05);
+        border: 2px solid #8b6ba4;
+    }
+    .other-month {
+        background: #f9f9f9;
+        color: #ccc;
+    }
+    .today {
+        background: #e6f3ff;
+        border: 2px solid #b5d8ff;
+    }
+    .has-task {
+        background: #ffeef2;
+        box-shadow: 0 2px 5px rgba(255, 0, 0, 0.2);
+    }
+    .day-number {
+        font-size: 14px;
+        font-weight: bold;
+        color: #666;
+    }
+    /* Task Labels */
+    .task-label {
+        font-size: 10px;
+        padding: 4px;
+        margin-top: 4px;
+        border-radius: 4px;
+        color: #fff;
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .task-academic { background: #6ec6a4; }
+    .task-exam { background: #ff7f7f; }
+    .task-assignment { background: #7d6fb3; }
+    .task-personal { background: #ffad60; }
+    /* Task Input Section */
+    .task-input {
+        width: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .task-input input, .task-input select {
+        width: 80%;
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .add-task-btn {
+        margin-top: 10px;
+        font-size: 14px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        background: #8b6ba4;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .add-task-btn:hover {
+        background: #6a4c93;
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Calendar Section -->
+ <div class="calendar-wrapper">
+    <div class="calendar-header">
+    <div class="calendar-nav">
+    <button id="prevMonth">←</button>
+    <span class="month-year" id="monthYear"></span>
+    <button id="nextMonth">→</button>
+    </div>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+   
+    <!-- Task Input Section -->
+    <div class="task-input">
+    <h3>Add Task</h3>
+    <p id="selectedDate">Select a date</p>
+    <input type="text" id="taskTitle" placeholder="Task Name">
+    <select id="taskCategory">
+    <option value="academic">Academic</option>
+    <option value="exam">Exam</option>
+    <option value="assignment">Assignment</option>
+    <option value="personal">Personal</option>
+    </select>
+    <button class="add-task-btn" onclick="addTask()">Add Task</button>
+    </div>
+   
+    <script>
+        // Task data
+        let tasks = {};
+        let selectedDate = null;
+        
+        function renderCalendar(year, month) {
+         const firstDay = new Date(year, month, 1);
+         const lastDay = new Date(year, month + 1, 0);
+         const startingDay = firstDay.getDay();
+         const monthLength = lastDay.getDate();
+         const today = new Date();
+         
+         // Update month and year display
+         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+         document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+        
+         // Clear grid
+         const grid = document.getElementById('calendarGrid');
+         grid.innerHTML = '';
+        
+         // Add weekdays
+         const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+         weekdays.forEach(day => {
+         const dayElement = document.createElement('div');
+         dayElement.className = 'weekday';
+         dayElement.textContent = day;
+         grid.appendChild(dayElement);
+         });
+        
+         // Add days
+         let dayCount = 1;
+         const totalCells = Math.ceil((startingDay + monthLength) / 7) * 7;
+         for (let i = 0; i < totalCells; i++) {
+         const dayCell = document.createElement('div');
+         dayCell.className = 'calendar-day';
+         if (i < startingDay || dayCount > monthLength) {
+         dayCell.classList.add('other-month');
+         } else {
+         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayCount).padStart(2, '0')}`;
+         dayCell.innerHTML = `<div class="day-number">${dayCount}</div>`;
+         dayCell.onclick = () => selectDate(dateString, dayCell);
+         
+         if (tasks[dateString]) {
+         dayCell.classList.add('has-task');
+         tasks[dateString].forEach(task => {
+         const taskElement = document.createElement('div');
+         taskElement.className = `task-label task-${task.category}`;
+         taskElement.textContent = task.title;
+         dayCell.appendChild(taskElement);
+         });
+         }
+         dayCount++;
+         }
+         grid.appendChild(dayCell);
+         }
+        }
+        
+        function selectDate(date, cell) {
+         selectedDate = date;
+         document.getElementById('selectedDate').textContent = `Selected Date: ${date}`;
+         document.querySelectorAll('.calendar-day').forEach(day => day.classList.remove('selected'));
+         cell.classList.add('selected');
+        }
+        
+        function addTask() {
+         if (!selectedDate) return alert('Please select a date first.');
+         const title = document.getElementById('taskTitle').value;
+         const category = document.getElementById('taskCategory').value;
+         if (!title) return alert('Enter task name.');
+         if (!tasks[selectedDate]) tasks[selectedDate] = [];
+         tasks[selectedDate].push({ title, category });
+         renderCalendar(currentYear, currentMonth);
+        }
+        
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        renderCalendar(currentYear, currentMonth);
+        </script>
+        
+</body>
+</html>
