@@ -17,8 +17,8 @@ A **frontend web application** built with **HTML, CSS, and JavaScript** that hel
 *  **Mood Tracker** – monitor emotional well-being patterns
 *  **Study Groups & Peer Mentorship** – collaboration and guidance
 *  **Timer** – Pomodoro-style study sessions
-*  **Flashcards & Mind Maps** – boost learning and revision
-*  **Calendar** – track exams, assignments, and schedules
+*  **Flashcards & Mind Maps** – Boost learning and revision
+*  **Calendar** – Track exams, assignments, and schedules
 
 ---
 
